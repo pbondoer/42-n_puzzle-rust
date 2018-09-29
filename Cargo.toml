@@ -1,0 +1,15 @@
+[package]
+name = "rustaquin"
+version = "0.1.0"
+authors = ["Pierre Bondoerffer <pierre.bondoerffer@gandi.net>"]
+
+[dependencies]
+
+[profile.release]
+lto = true
+debug = false
+panic = 'abort'
+opt-level = 'z'
+incremental = false
+overflow-checks = false
+debug-assertions = false
