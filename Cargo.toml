@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Pierre Bondoerffer <pierre.bondoerffer@gandi.net>"]
 
 [dependencies]
+npuzzle_lib = { path = "./npuzzle_lib" }
 
 [profile.release]
 lto = true
