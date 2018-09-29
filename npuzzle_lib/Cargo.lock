@@ -1,23 +1,4 @@
 [[package]]
-name = "indexmap"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
 name = "npuzzle_lib"
 version = "0.1.0"
-dependencies = [
- "priority-queue 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
-[[package]]
-name = "priority-queue"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "indexmap 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[metadata]
-"checksum indexmap 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "7164c96d6e18ccc3ce43f3dedac996c21a220670a106c275b96ad92110401362"
-"checksum priority-queue 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "41196e93c8f2e2b41768adadabfcbe9a6296980503ced7c904392e796e1f08ab"
