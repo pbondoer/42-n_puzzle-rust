@@ -39,3 +39,8 @@ pub struct Problem {
     pub end: Puzzle,
     pub size: Atom,
 }
+
+pub struct ParsedPuzzle {
+    pub container: Puzzle,
+    pub size: Atom,
+}
