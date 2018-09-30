@@ -3,6 +3,19 @@ use types::AtomPair;
 use types::Puzzle;
 
 #[inline]
+pub fn find_empty_pos(puzzle: &Puzzle) -> Atom {
+    for i in 0..puzzle.len() {
+        if puzzle[i] == 0 {
+            return i as Atom;
+        }
+    }
+
+    assert!(false "could not find empty pos");
+
+    0
+}
+
+#[inline]
 pub fn xy(value: Atom, size: Atom) -> AtomPair {
     (value % size, value / size)
 }

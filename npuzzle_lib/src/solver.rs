@@ -7,8 +7,11 @@ use types::Node;
 use types::Problem;
 use types::Puzzle;
 
+use util::find_empty_pos;
 use util::print_puzzle;
 use util::xy;
+
+use checker::is_solvable;
 
 use heuristics::manhattan;
 
@@ -46,18 +49,6 @@ fn neighbors(puzzle: &Puzzle, pos: Atom, size: Atom) -> HashSet<(Puzzle, Atom)> 
     set
 }
 
-fn find_empty_pos(puzzle: &Puzzle) -> Atom {
-    for i in 0..puzzle.len() {
-        if puzzle[i] == 0 {
-            return i as Atom;
-        }
-    }
-
-    assert!(false "could not find empty pos");
-
-    0
-}
-
 pub fn solve(problem: &Problem) {
     println!("-----------------------------");
     println!("start state:");
@@ -68,7 +59,10 @@ pub fn solve(problem: &Problem) {
     println!("");
 
     println!("size: {}", problem.size);
-    println!("-----------------------------");
+    assert!(
+        is_solvable(&problem.start, &problem.end, problem.size),
+        "puzzle not solvable"
+    );
 
     let mut open = BinaryHeap::new();
     let mut closed = HashSet::new();
@@ -84,12 +78,18 @@ pub fn solve(problem: &Problem) {
     let mut node_wrapped = open.pop();
     let mut node: Node;
 
+    let mut i = 0;
+
     while node_wrapped != None {
         node = node_wrapped.unwrap();
 
+        println!("----------------------------- {}", i);
         println!("open size: {}", open.len());
+        println!("closed size: {}", closed.len());
         println!("-----------------------------");
         print_puzzle(&node.array, problem.size);
+        println!("----- > priority: {}", node.h_result + node.g_result);
+        println!("----- > h: {} - g: {}", node.h_result, node.g_result);
         println!("-----------------------------");
 
         if node.array == problem.end {
@@ -98,7 +98,7 @@ pub fn solve(problem: &Problem) {
         }
 
         closed.insert(node.array.clone());
-
+        println!("@@@@@@@@@@ -> Neighbors");
         for raw_neighbor in neighbors(&node.array, node.pos, problem.size) {
             let (neighbor, neighbor_pos) = raw_neighbor;
 
@@ -116,12 +116,16 @@ pub fn solve(problem: &Problem) {
                 pos: neighbor_pos,
             });
 
-            //println!("    h_result: {}", manhattan(&neighbor, &problem.end, problem.size));
+            println!(
+                "@@@@@@@ priority: {}",
+                manhattan(&neighbor, &problem.end, problem.size) + node.g_result + 1
+            );
 
             //println!("----------------");
             from.insert(neighbor, node.array.clone());
         }
 
         node_wrapped = open.pop();
+        i += 1;
     }
 }
