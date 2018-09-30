@@ -3,17 +3,17 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 use types::Atom;
+use types::Heuristic;
 use types::Node;
 use types::Problem;
 use types::Puzzle;
+use types::Solution;
 
 use util::find_empty_pos;
 use util::print_puzzle;
 use util::xy;
 
 use checker::is_solvable;
-
-use heuristics::manhattan;
 
 const NEIGHBOR_DELTAS: [(i8, i8); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
 
@@ -38,10 +38,11 @@ fn neighbors(puzzle: &Puzzle, pos: Atom, size: Atom) -> HashSet<(Puzzle, Atom)> 
 
         // clone and swap
         let mut cur = puzzle.clone();
-        let cur_pos = y as i32 * size as i32 + x as i32;
+        let cur_pos = y * size as i32 + x;
+
         cur.swap(pos as usize, cur_pos as usize);
 
-        set.insert((cur, cur_pos as u16));
+        set.insert((cur, cur_pos as Atom));
     }
 
     assert!(!set.is_empty(), "set should not be empty");
@@ -49,83 +50,97 @@ fn neighbors(puzzle: &Puzzle, pos: Atom, size: Atom) -> HashSet<(Puzzle, Atom)> 
     set
 }
 
-pub fn solve(problem: &Problem) {
-    println!("-----------------------------");
-    println!("start state:");
-    print_puzzle(&problem.start, problem.size);
-    println!("");
-    println!("end state:");
-    print_puzzle(&problem.end, problem.size);
-    println!("");
+pub fn solve<'a>(problem: &'a Problem, heuristic: Heuristic) -> Option<Solution> {
+    if !is_solvable(&problem.start, &problem.end, problem.size) {
+        return None;
+    }
 
-    println!("size: {}", problem.size);
-    assert!(
-        is_solvable(&problem.start, &problem.end, problem.size),
-        "puzzle not solvable"
-    );
-
+    // A*
     let mut open = BinaryHeap::new();
     let mut closed = HashSet::new();
-    let mut from = HashMap::new();
+    let mut from: HashMap<Puzzle, Puzzle> = HashMap::new();
+
+    // Final path
+    let mut path = Vec::new();
+
+    // Add the first node
+    let h_result = heuristic(&problem.start, &problem.end, problem.size);
 
     open.push(Node {
         array: problem.start.clone(),
-        h_result: manhattan(&problem.start, &problem.end, problem.size),
+        h_result,
         g_result: 0,
+        f_result: h_result,
         pos: find_empty_pos(&problem.start),
     });
 
+    // start poppin' nodes
     let mut node_wrapped = open.pop();
-    let mut node: Node;
-
-    let mut i = 0;
+    let mut node;
 
     while node_wrapped != None {
         node = node_wrapped.unwrap();
 
-        println!("----------------------------- {}", i);
-        println!("open size: {}", open.len());
-        println!("closed size: {}", closed.len());
-        println!("-----------------------------");
-        print_puzzle(&node.array, problem.size);
-        println!("----- > priority: {}", node.h_result + node.g_result);
-        println!("----- > h: {} - g: {}", node.h_result, node.g_result);
-        println!("-----------------------------");
+        closed.insert(node.array.clone());
 
         if node.array == problem.end {
-            println!("Found solution, breaking the loop");
+            // Done, time to unwind the path
+            let mut current = node.array.clone();
+
+            path.push(current.clone());
+            while from.contains_key(&current) {
+                current = from[&current].clone();
+                path.push(current.clone());
+            }
             break;
         }
 
-        closed.insert(node.array.clone());
-        println!("@@@@@@@@@@ -> Neighbors");
         for raw_neighbor in neighbors(&node.array, node.pos, problem.size) {
             let (neighbor, neighbor_pos) = raw_neighbor;
-
-            //println!("    raw neighbor: ");
-            //print_puzzle(&neighbor, problem.size);
 
             if closed.contains(&neighbor) {
                 continue;
             }
 
+            let g_result = node.g_result + 1;
+            let h_result = heuristic(&neighbor, &problem.end, problem.size);
+
             open.push(Node {
                 array: neighbor.clone(),
-                h_result: manhattan(&neighbor, &problem.end, problem.size),
-                g_result: node.g_result + 1,
+                h_result,
+                g_result,
+                f_result: h_result + g_result,
                 pos: neighbor_pos,
             });
 
-            println!(
-                "@@@@@@@ priority: {}",
-                manhattan(&neighbor, &problem.end, problem.size) + node.g_result + 1
-            );
-
-            //println!("----------------");
-            from.insert(neighbor, node.array.clone());
+            from.insert(neighbor.clone(), node.array.clone());
         }
 
         node_wrapped = open.pop();
-        i += 1;
     }
+
+    path.reverse();
+
+    // done
+    Some(Solution {
+        problem,
+        path,
+        max_states: closed.len() + open.len(),
+        opened_states: open.len() + closed.len(),
+        closed_states: closed.len(),
+    })
+}
+
+pub fn print_solution(s: &Solution) {
+    println!("-----------------");
+    for p in &s.path {
+        print_puzzle(&p, s.problem.size);
+        println!("-----------------");
+    }
+
+    println!(" - Solution length: {}", s.path.len());
+    println!(" - Maximum states in memory: {}", s.max_states);
+    println!(" - Total opened states: {}", s.opened_states);
+    println!(" - Total closed states: {}", s.closed_states);
+    println!("-----------------");
 }

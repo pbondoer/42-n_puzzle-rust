@@ -4,7 +4,7 @@ use npuzzle_lib::*;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 fn main() {
-    solver::solve(&types::Problem {
+    let problem = types::Problem {
         start: vec![
             1, 2, 3,
             4, 0, 6,
@@ -16,5 +16,12 @@ fn main() {
             7, 6, 5,
         ],
         size: 3,
-    });
+    };
+    //let solution = solver::solve(&problem, heuristics::linear_conflicts);
+    let solution = None;
+
+    match solution {
+        None => println!("No solution found"),
+        Some(s) => solver::print_solution(&s),
+    }
 }
