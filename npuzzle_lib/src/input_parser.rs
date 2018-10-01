@@ -34,7 +34,7 @@ fn is_puzzle_correct(puzzle: &ParsedPuzzle, filename: &String) -> bool {
     for i in 0..max_number as usize {
         if puzzle.container[i] > max_number - 1 {
             println!(
-                "File : {} : {} {} at puzzle index {} : {} ",
+                "File : {} : {} {} at puzzle index {} : {}",
                 filename,
                 ERR_INVALID_ELMT,
                 max_number - 1,
@@ -73,10 +73,10 @@ fn parse_puzzle_size(size: &mut Atom, line: &Vec<String>) -> Option<Vec<&'static
             (_, true) => vec_err.push(&ERR_SIZE_SYNTAX),
         }
     }
-    if vec_err.len() == 0 {
-        return None;
+    match vec_err.len() {
+        0 => None,
+        _ => Some(vec_err),
     }
-    Some(vec_err)
 }
 
 fn parse_puzzle(puzzle: &mut Puzzle, size: &Atom, line: &Vec<String>) -> Option<Vec<&'static str>> {
@@ -96,7 +96,10 @@ fn parse_puzzle(puzzle: &mut Puzzle, size: &Atom, line: &Vec<String>) -> Option<
     if line.len() != *size as usize && line.len() != 0 {
         vec_err.push(&ERR_NUMBER_PER_LINE);
     }
-    Some(vec_err)
+    match vec_err.len() {
+        0 => None,
+        _ => Some(vec_err),
+    }
 }
 
 fn parse_line(puzzle: &mut ParsedPuzzle, line: &str) -> Option<Vec<&'static str>> {
@@ -235,6 +238,16 @@ mod tests {
     }
 
     #[test]
+    fn parse_puzzle_size_empty() {
+        let mut size: Atom = 0;
+        let vec_test: Vec<String> = vec![];
+        let vec_err: Option<Vec<&'static str>> = parse_puzzle_size(&mut size, &vec_test);
+
+        assert_eq!(vec_err, None);
+        assert_eq!(size, 0);
+    }
+
+    #[test]
     fn parse_puzzle_size_negative() {
         let mut size: Atom = 0;
         let vec_test: Vec<String> = vec!["-2".to_string()];
@@ -309,6 +322,17 @@ mod tests {
             vec![ERR_NUMBER_INVALID, ERR_NUMBER_INVALID]
         );
         assert_eq!(puzzle, vec_expected);
+    }
+
+    #[test]
+    fn parse_puzzle_empty_line() {
+        let mut puzzle: Puzzle = Vec::new();
+        let size: Atom = 3;
+
+        let vec_test: Vec<String> = vec![];
+        let vec_err: Option<Vec<&'static str>> = parse_puzzle(&mut puzzle, &size, &vec_test);
+
+        assert_eq!(vec_err, None);
     }
 
     #[test]
