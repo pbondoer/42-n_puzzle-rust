@@ -16,8 +16,8 @@ pub static ERR_OPEN_FILE: &str = "Failed to open file. Exiting";
 
 //Possible errors in is_puzzle_correct
 pub static ERR_NUMBER_OF_LINES: &str = "Invalid number of lines in n-puzzle";
-pub static ERR_INVALID_ELMT: &str = "One or more elements are superior to (size * size - 1)";
-pub static ERR_DUPLICATED_VALUE: &str = "One or more elements are duplicated";
+pub static ERR_INVALID_ELMT: &str = "The following number is superior to the max value equal to";
+pub static ERR_DUPLICATED_VALUE: &str = "The following number is duplicated";
 pub static ERR_SIZE: &str = "Size must be superior or equal to 3";
 
 fn is_puzzle_correct(puzzle: &ParsedPuzzle, filename: &String) -> bool {
@@ -31,19 +31,16 @@ fn is_puzzle_correct(puzzle: &ParsedPuzzle, filename: &String) -> bool {
         println!("File : {} : {}", filename, ERR_NUMBER_OF_LINES);
         return false;
     }
-    if let Some(_) = puzzle
-        .container
-        .clone()
-        .into_iter()
-        .find(|x| *x > max_number - 1)
-    {
-        println!("File : {} : {}", filename, ERR_INVALID_ELMT);
-        return false;
-    }
+	for i in 0..max_number as usize {
+		if puzzle.container[i] > max_number - 1 {
+	        println!("File : {} : {} {} at puzzle index {} : {} ", filename, ERR_INVALID_ELMT, max_number - 1 , i, puzzle.container[i]);
+        	return false;	
+		}
+	}
     for i in 0..max_number as usize {
         for j in (i + 1)..max_number as usize {
             if puzzle.container[i] == puzzle.container[j] {
-                println!("File : {} : {}", filename, ERR_DUPLICATED_VALUE);
+                println!("File : {} : {} : {} at puzzle index {}", filename, ERR_DUPLICATED_VALUE, i, puzzle.container[i]);
                 return false;
             }
         }
@@ -86,7 +83,7 @@ fn parse_puzzle(puzzle: &mut Puzzle, size: &Atom, line: &Vec<String>) -> Option<
         puzzle.append(&mut vec_cur_line);
         return None;
     }
-    if line.len() != *size as usize {
+    if line.len() != *size as usize && line.len() != 0 {
         vec_err.push(&ERR_NUMBER_PER_LINE);
     }
     Some(vec_err)
@@ -160,7 +157,7 @@ fn generate_puzzle_from_stdin() -> Option<ParsedPuzzle> {
                 }
                 //parsing
                 match parse_line(&mut puzzle, &buff) {
-                    None => {}
+                    None => line_nb = line_nb + 1,
                     Some(v_err) => {
                         had_error = true;
                         for e in v_err {
@@ -170,13 +167,9 @@ fn generate_puzzle_from_stdin() -> Option<ParsedPuzzle> {
                                 line_nb,
                                 e
                             );
-                            if puzzle.size == 0 {
-                                return None;
-                            }
                         }
                     }
                 }
-                line_nb = line_nb + 1;
             }
             Err(_) => {
                 println!("{}", ERR_IO_STDIN);
