@@ -10,8 +10,6 @@ pub fn classic(size: Atom) -> Puzzle {
     solution
 }
 
-
-
 pub fn snail(size: Atom) -> Puzzle {
     let ssize: usize = size as usize * size as usize;
     let mut solution: Puzzle = vec![0; ssize];

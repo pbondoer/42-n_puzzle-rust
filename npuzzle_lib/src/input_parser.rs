@@ -31,16 +31,26 @@ fn is_puzzle_correct(puzzle: &ParsedPuzzle, filename: &String) -> bool {
         println!("File : {} : {}", filename, ERR_NUMBER_OF_LINES);
         return false;
     }
-	for i in 0..max_number as usize {
-		if puzzle.container[i] > max_number - 1 {
-	        println!("File : {} : {} {} at puzzle index {} : {} ", filename, ERR_INVALID_ELMT, max_number - 1 , i, puzzle.container[i]);
-        	return false;	
-		}
-	}
+    for i in 0..max_number as usize {
+        if puzzle.container[i] > max_number - 1 {
+            println!(
+                "File : {} : {} {} at puzzle index {} : {} ",
+                filename,
+                ERR_INVALID_ELMT,
+                max_number - 1,
+                i,
+                puzzle.container[i]
+            );
+            return false;
+        }
+    }
     for i in 0..max_number as usize {
         for j in (i + 1)..max_number as usize {
             if puzzle.container[i] == puzzle.container[j] {
-                println!("File : {} : {} : {} at puzzle index {}", filename, ERR_DUPLICATED_VALUE, i, puzzle.container[i]);
+                println!(
+                    "File : {} : {} : {} at puzzle index {}",
+                    filename, ERR_DUPLICATED_VALUE, i, puzzle.container[i]
+                );
                 return false;
             }
         }
