@@ -1,13 +1,6 @@
--> Parser
-  - stdin + file
--> Args parser
-
 -> random valid puzzle generator
--> greedy and uniform cost search (weight 0 on h and g)
-
 -> Check tests + docs
 
 Bonus:
  -> multiple algos (RBFS, A*)
  -> adaptive weight
- -> custom goal

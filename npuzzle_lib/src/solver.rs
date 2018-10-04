@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 use types::Atom;
-use types::Heuristic;
 use types::Node;
 use types::Problem;
 use types::Puzzle;
@@ -12,8 +11,6 @@ use types::Solution;
 use util::find_empty_pos;
 use util::print_puzzle;
 use util::xy;
-
-use checker::is_solvable;
 
 const NEIGHBOR_DELTAS: [(i8, i8); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
 
@@ -50,12 +47,7 @@ fn neighbors(puzzle: &Puzzle, pos: Atom, size: Atom) -> HashSet<(Puzzle, Atom)> 
     set
 }
 
-pub fn solve<'a>(problem: &'a Problem, heuristic: Heuristic) -> Option<Solution> {
-    if !is_solvable(&problem.start, &problem.end, problem.size) {
-        return None;
-    }
-
-    // A*
+pub fn astar<'a>(problem: &'a Problem) -> Solution {
     let mut open = BinaryHeap::new();
     let mut closed = HashSet::new();
     let mut from: HashMap<Puzzle, Puzzle> = HashMap::new();
@@ -64,7 +56,7 @@ pub fn solve<'a>(problem: &'a Problem, heuristic: Heuristic) -> Option<Solution>
     let mut path = Vec::new();
 
     // Add the first node
-    let h_result = heuristic(&problem.start, &problem.end, problem.size);
+    let h_result = (problem.heuristic)(&problem.start, &problem.end, problem.size);
 
     open.push(Node {
         array: problem.start.clone(),
@@ -103,13 +95,15 @@ pub fn solve<'a>(problem: &'a Problem, heuristic: Heuristic) -> Option<Solution>
             }
 
             let g_result = node.g_result + 1;
-            let h_result = heuristic(&neighbor, &problem.end, problem.size);
+            let h_result = (problem.heuristic)(&neighbor, &problem.end, problem.size);
+
+            let f_result = (h_result * problem.h_weight) + (g_result * problem.g_weight);
 
             open.push(Node {
                 array: neighbor.clone(),
                 h_result,
                 g_result,
-                f_result: h_result + g_result,
+                f_result,
                 pos: neighbor_pos,
             });
 
@@ -122,13 +116,14 @@ pub fn solve<'a>(problem: &'a Problem, heuristic: Heuristic) -> Option<Solution>
     path.reverse();
 
     // done
-    Some(Solution {
+    Solution {
         problem,
         path,
         max_states: closed.len() + open.len(),
         opened_states: open.len() + closed.len(),
+        current_open_states: open.len(),
         closed_states: closed.len(),
-    })
+    }
 }
 
 pub fn print_solution(s: &Solution) {
@@ -140,6 +135,10 @@ pub fn print_solution(s: &Solution) {
 
     println!(" - Solution length: {}", s.path.len());
     println!(" - Maximum states in memory: {}", s.max_states);
+    println!(
+        " - Open states at time of solution: {}",
+        s.current_open_states
+    );
     println!(" - Total opened states: {}", s.opened_states);
     println!(" - Total closed states: {}", s.closed_states);
     println!("-----------------");

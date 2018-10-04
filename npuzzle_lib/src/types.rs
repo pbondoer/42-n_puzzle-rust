@@ -9,6 +9,7 @@ pub type Puzzle = Vec<Atom>;
 pub type AtomPair = (Atom, Atom);
 
 pub type Heuristic = fn(a: &Puzzle, b: &Puzzle, size: Atom) -> Result;
+pub type Solver = fn(p: &Problem) -> Solution;
 
 // Constants
 pub static MAX_PUZZLE_SIZE: Atom = 100;
@@ -28,6 +29,7 @@ pub struct Solution<'a> {
     pub path: Vec<Puzzle>,
     pub max_states: Statistic,
     pub opened_states: Statistic,
+    pub current_open_states: Statistic,
     pub closed_states: Statistic,
 }
 
@@ -50,6 +52,10 @@ pub struct Problem {
     pub start: Puzzle,
     pub end: Puzzle,
     pub size: Atom,
+    pub heuristic: Heuristic,
+    pub g_weight: Result,
+    pub h_weight: Result,
+    pub adaptive: bool,
 }
 
 pub struct ParsedPuzzle {
