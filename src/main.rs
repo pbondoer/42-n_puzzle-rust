@@ -15,8 +15,8 @@ use types::Solver;
  *  --input | -i     >> file, stdin, random
  *  --goal | -o      >> file, stdin, snail, classic
  *  --solver | -s    >> rbfs, astar
- *  --heuristic | -h >> hamming, manhattan, conflicts, uniform
- *  --uniform | -u   >> same as -h uniform
+ *  --heuristic | -h >> hamming, manhattan, conflicts
+ *  --uniform | -u   >> sets h weight to 0
  *  --greedy | -g    >> sets g weight to 0
  *  --adaptive | -a  >> weights change
  *
@@ -26,6 +26,7 @@ pub struct ParsedArgs {
     pub solver: Solver,
     pub input: String,
     pub goal: String,
+    pub iterations: u64,
 }
 
 fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
@@ -43,6 +44,7 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
 
     let mut input: String = "stdin".to_string();
     let mut goal: String = "snail".to_string();
+    let mut iterations: u64 = 10000;
 
     for mut i in 0..args.len() {
         let mut cur = &args[i];
@@ -68,7 +70,10 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
                     "hamming" => problem.heuristic = heuristics::hamming,
                     "manhattan" => problem.heuristic = heuristics::manhattan,
                     "conflicts" => problem.heuristic = heuristics::linear_conflicts,
-                    _ => panic!("unknown heuristic"),
+                    _ => {
+                        println!("heuristic {} is not valid", cur);
+                        process::exit(1);
+                    }
                 }
             }
             "--solver" | "-s" => {
@@ -78,12 +83,27 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
                 match &cur as &str {
                     "astar" => solver = solver::astar,
                     "rbfs" => solver = solver::astar, // TODO
-                    _ => panic!("unknown solver"),
+                    _ => {
+                        println!("solver {} is not valid", cur);
+                        process::exit(1);
+                    }
                 }
             }
             "--adaptive" | "-a" => problem.adaptive = true,
             "--uniform" | "-u" => problem.h_weight = 0,
             "--greedy" | "-g" => problem.g_weight = 0,
+            "--iterations" | "-n" => {
+                i += 1;
+                cur = &args[i];
+
+                match cur.parse::<u64>() {
+                    Ok(val) => iterations = val,
+                    Err(_) => {
+                        println!("iterations {} is not valid", cur);
+                        process::exit(1);
+                    }
+                }
+            }
             _ => {}
         }
     }
@@ -94,6 +114,7 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
             solver,
             input,
             goal,
+            iterations,
         },
     )
 }
@@ -103,17 +124,24 @@ fn main() {
 
     // 1. Input
     let opt_input: Option<ParsedPuzzle>;
+    let mut random: bool = false;
 
     match &parsed.input as &str {
         "stdin" => {
             println!("Reading stdin for input state...");
             opt_input = input_parser::parse(None)
         }
-        "random" => panic!("unhandled yet"),
+        "random" => {
+            random = true;
+            opt_input = Some(ParsedPuzzle {
+                container: vec![],
+                size: 3,
+            });
+        }
         _ => opt_input = input_parser::parse(Some(&parsed.input)),
     }
 
-    let input;
+    let mut input;
     match opt_input {
         Some(e) => input = e,
         None => {
@@ -152,6 +180,11 @@ fn main() {
             println!("Error while parsing, exiting");
             process::exit(1);
         }
+    }
+
+    // 2.1 Generate random if needed
+    if random {
+        input = generator::generate_valid_puzzle(&goal, parsed.iterations);
     }
 
     // 3. Check sizes

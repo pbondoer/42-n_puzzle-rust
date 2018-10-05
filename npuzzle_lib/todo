@@ -1,6 +1,2 @@
--> random valid puzzle generator
--> Check tests + docs
-
-Bonus:
  -> multiple algos (RBFS, A*)
  -> adaptive weight

@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["cledant <cledant@student.42.fr>"]
 
 [dependencies]
+rand = "0.5.5"
 
 [profile.dev]
 opt-level = 3

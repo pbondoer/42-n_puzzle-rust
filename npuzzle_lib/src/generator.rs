@@ -1,5 +1,42 @@
+extern crate rand;
+
+use generator::rand::distributions::{Distribution, Uniform};
+
+use solver::neighbors;
+use util::find_empty_pos;
+
 use types::Atom;
+use types::ParsedPuzzle;
 use types::Puzzle;
+
+pub fn generate_valid_puzzle(puzzle: &ParsedPuzzle, iterations: u64) -> ParsedPuzzle {
+    let mut state = ParsedPuzzle {
+        container: puzzle.container.clone(),
+        size: puzzle.size,
+    };
+
+    let mut last_pos = find_empty_pos(&state.container);
+    let between = Uniform::from(0..4);
+    let mut rng = rand::thread_rng();
+
+    for _i in 0..iterations {
+        let neighbors = neighbors(&state.container, last_pos, state.size);
+
+        let mut swap_n = between.sample(&mut rng) % neighbors.len();
+
+        let mut n = 0;
+        for neighbor in neighbors {
+            if n == swap_n {
+                state.container = neighbor.0;
+                last_pos = neighbor.1;
+                break;
+            }
+            n += 1
+        }
+    }
+
+    state
+}
 
 pub fn classic(size: Atom) -> Puzzle {
     let mut solution: Puzzle = (1..size * size + 1).collect();

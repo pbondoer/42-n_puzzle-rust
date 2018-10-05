@@ -14,7 +14,7 @@ use util::xy;
 
 const NEIGHBOR_DELTAS: [(i8, i8); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
 
-fn neighbors(puzzle: &Puzzle, pos: Atom, size: Atom) -> HashSet<(Puzzle, Atom)> {
+pub fn neighbors(puzzle: &Puzzle, pos: Atom, size: Atom) -> HashSet<(Puzzle, Atom)> {
     let mut set = HashSet::new();
 
     for p in NEIGHBOR_DELTAS.iter() {
@@ -133,7 +133,7 @@ pub fn print_solution(s: &Solution) {
         println!("-----------------");
     }
 
-    println!(" - Solution length: {}", s.path.len());
+    println!(" - Solution length: {}", s.path.len() - 1);
     println!(" - Maximum states in memory: {}", s.max_states);
     println!(
         " - Open states at time of solution: {}",
