@@ -8,20 +8,6 @@ use types::ParsedPuzzle;
 use types::Problem;
 use types::Solver;
 
-/*
- * arguments you can pass:
- * ./rustaquin
- *
- *  --input | -i     >> file, stdin, random
- *  --goal | -o      >> file, stdin, snail, classic
- *  --solver | -s    >> rbfs, astar
- *  --heuristic | -h >> hamming, manhattan, conflicts
- *  --uniform | -u   >> sets h weight to 0
- *  --greedy | -g    >> sets g weight to 0
- *  --adaptive | -a  >> weights change
- *
- *  --               >> stop parsing args
- */
 pub struct ParsedArgs {
     pub solver: Solver,
     pub input: String,
@@ -34,16 +20,10 @@ const HELP_TEXT: &'static str = "Usage: rustaquin -i [file] -o [file]
 Arguments:
 --input | -i [stdin, file, random]
 --goal | -o [snail, classic, stdin, file]
---solver | -s [rbfs, astar]
 --heuristic | -h [conflicts, hamming, manhattan]
 --uniform | -u
 --greedy | -g
---adaptive | -a
---iterations | -n [number]
-
-You can also specify input and goal files like so:
-rustaquin [input] [goal]
-rustaquin --greedy -- [input] [goal]";
+--iterations | -n [number]";
 
 fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
     let mut problem = Problem {
@@ -53,10 +33,7 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
         heuristic: heuristics::linear_conflicts,
         g_weight: 1,
         h_weight: 1,
-        adaptive: false,
     };
-
-    let mut solver: Solver = solver::astar;
 
     let mut input: String = "stdin".to_string();
     let mut goal: String = "snail".to_string();
@@ -98,19 +75,6 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
                     }
                 }
             }
-            "--solver" | "-s" => {
-                cur = &args[i + 1];
-
-                match &cur as &str {
-                    "astar" => solver = solver::astar,
-                    "rbfs" => solver = solver::astar, // TODO
-                    _ => {
-                        println!("solver {} is not valid", cur);
-                        process::exit(1);
-                    }
-                }
-            }
-            "--adaptive" | "-a" => problem.adaptive = true,
             "--uniform" | "-u" => problem.h_weight = 0,
             "--greedy" | "-g" => problem.g_weight = 0,
             "--iterations" | "-n" => {
@@ -131,7 +95,7 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
     (
         problem,
         ParsedArgs {
-            solver,
+            solver: solver::astar,
             input,
             goal,
             iterations,

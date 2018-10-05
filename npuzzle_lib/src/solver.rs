@@ -1,6 +1,7 @@
 use std::collections::BinaryHeap;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::time::SystemTime;
 
 use types::Atom;
 use types::Node;
@@ -48,6 +49,8 @@ pub fn neighbors(puzzle: &Puzzle, pos: Atom, size: Atom) -> HashSet<(Puzzle, Ato
 }
 
 pub fn astar<'a>(problem: &'a Problem) -> Solution {
+    let start_time = SystemTime::now();
+
     let mut open = BinaryHeap::new();
     let mut closed = HashSet::new();
     let mut from: HashMap<Puzzle, Puzzle> = HashMap::new();
@@ -56,13 +59,13 @@ pub fn astar<'a>(problem: &'a Problem) -> Solution {
     let mut path = Vec::new();
 
     // Add the first node
-    let h_result = (problem.heuristic)(&problem.start, &problem.end, problem.size);
+    let initial_h_result = (problem.heuristic)(&problem.start, &problem.end, problem.size);
 
     open.push(Node {
         array: problem.start.clone(),
-        h_result,
+        h_result: initial_h_result,
         g_result: 0,
-        f_result: h_result,
+        f_result: initial_h_result,
         pos: find_empty_pos(&problem.start),
     });
 
@@ -123,6 +126,7 @@ pub fn astar<'a>(problem: &'a Problem) -> Solution {
         opened_states: open.len() + closed.len(),
         current_open_states: open.len(),
         closed_states: closed.len(),
+        time: start_time,
     }
 }
 
@@ -133,6 +137,11 @@ pub fn print_solution(s: &Solution) {
         println!("-----------------");
     }
 
+    match &s.time.elapsed() {
+        Ok(elapsed) => println!(" - Time elapsed: {:?}", elapsed),
+        Err(_) => {}
+    }
+    println!(" - Solution length: {}", s.path.len() - 1);
     println!(" - Solution length: {}", s.path.len() - 1);
     println!(" - Maximum states in memory: {}", s.max_states);
     println!(

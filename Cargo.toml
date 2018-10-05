@@ -10,7 +10,7 @@ npuzzle_lib = { path = "./npuzzle_lib" }
 lto = true
 debug = false
 panic = 'abort'
-opt-level = 'z'
+opt-level = 3
 incremental = false
 overflow-checks = false
 debug-assertions = false

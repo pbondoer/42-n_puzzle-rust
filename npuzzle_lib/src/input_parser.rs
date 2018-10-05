@@ -113,7 +113,11 @@ fn parse_line(puzzle: &mut ParsedPuzzle, line: &str) -> Option<Vec<&'static str>
 
     //Parsing input
     match puzzle.size {
-        0 => return parse_puzzle_size(&mut puzzle.size, &vec_splited),
+        0 => {
+            let result = parse_puzzle_size(&mut puzzle.size, &vec_splited);
+            puzzle.container.reserve_exact(puzzle.size as usize * puzzle.size as usize);
+            return result;
+        }
         _ => return parse_puzzle(&mut puzzle.container, &puzzle.size, &vec_splited),
     };
 }

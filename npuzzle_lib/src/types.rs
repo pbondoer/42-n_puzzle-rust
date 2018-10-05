@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::time::SystemTime;
 
 // Types
 pub type Atom = u16;
@@ -31,6 +32,7 @@ pub struct Solution<'a> {
     pub opened_states: Statistic,
     pub current_open_states: Statistic,
     pub closed_states: Statistic,
+    pub time: SystemTime,
 }
 
 impl Ord for Node {
@@ -55,7 +57,6 @@ pub struct Problem {
     pub heuristic: Heuristic,
     pub g_weight: Result,
     pub h_weight: Result,
-    pub adaptive: bool,
 }
 
 pub struct ParsedPuzzle {
