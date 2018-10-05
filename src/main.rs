@@ -29,6 +29,22 @@ pub struct ParsedArgs {
     pub iterations: u64,
 }
 
+const HELP_TEXT: &'static str = "Usage: rustaquin -i [file] -o [file]
+
+Arguments:
+--input | -i [stdin, file, random]
+--goal | -o [snail, classic, stdin, file]
+--solver | -s [rbfs, astar]
+--heuristic | -h [conflicts, hamming, manhattan]
+--uniform | -u
+--greedy | -g
+--adaptive | -a
+--iterations | -n [number]
+
+You can also specify input and goal files like so:
+rustaquin [input] [goal]
+rustaquin --greedy -- [input] [goal]";
+
 fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
     let mut problem = Problem {
         start: vec![],
@@ -46,25 +62,31 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
     let mut goal: String = "snail".to_string();
     let mut iterations: u64 = 10000;
 
-    for mut i in 0..args.len() {
+    if args.len() == 1 {
+        println!("{}", HELP_TEXT);
+        process::exit(0);
+    }
+
+    for i in 1..args.len() {
         let mut cur = &args[i];
 
         match &cur as &str {
+            "--help" => {
+                println!("{}", HELP_TEXT);
+                process::exit(0);
+            },
             "--input" | "-i" => {
-                i += 1;
-                cur = &args[i];
+                cur = &args[i + 1];
 
                 input = cur.to_string();
             }
             "--goal" | "-o" => {
-                i += 1;
-                cur = &args[i];
+                cur = &args[i + 1];
 
                 goal = cur.to_string();
             }
             "--heuristic" | "-h" => {
-                i += 1;
-                cur = &args[i];
+                cur = &args[i + 1];
 
                 match &cur as &str {
                     "hamming" => problem.heuristic = heuristics::hamming,
@@ -77,8 +99,7 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
                 }
             }
             "--solver" | "-s" => {
-                i += 1;
-                cur = &args[i];
+                cur = &args[i + 1];
 
                 match &cur as &str {
                     "astar" => solver = solver::astar,
@@ -93,8 +114,7 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
             "--uniform" | "-u" => problem.h_weight = 0,
             "--greedy" | "-g" => problem.g_weight = 0,
             "--iterations" | "-n" => {
-                i += 1;
-                cur = &args[i];
+                cur = &args[i + 1];
 
                 match cur.parse::<u64>() {
                     Ok(val) => iterations = val,
@@ -184,6 +204,7 @@ fn main() {
 
     // 2.1 Generate random if needed
     if random {
+        println!("Generating random puzzle with {} iterations...", parsed.iterations);
         input = generator::generate_valid_puzzle(&goal, parsed.iterations);
     }
 
