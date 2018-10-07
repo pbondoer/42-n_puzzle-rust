@@ -1,7 +1,10 @@
 [package]
 name = "npuzzle_lib"
 version = "0.1.0"
-authors = ["cledant <cledant@student.42.fr>"]
+authors = [
+	"Pierre Bondoerffer <pbondoer@student.42.fr>",
+	"Clément Ledant <cledant@student.42.fr>",
+]
 
 [dependencies]
 rand = "0.5.5"

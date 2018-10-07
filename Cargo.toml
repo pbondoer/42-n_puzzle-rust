@@ -1,7 +1,10 @@
 [package]
 name = "rustaquin"
 version = "0.1.0"
-authors = ["Pierre Bondoerffer <pierre.bondoerffer@gandi.net>"]
+authors = [
+	"Pierre Bondoerffer <pbondoer@student.42.fr>",
+	"Clément Ledant <cledant@student.42.fr>",
+]
 
 [dependencies]
 npuzzle_lib = { path = "./npuzzle_lib" }

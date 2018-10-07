@@ -142,7 +142,6 @@ pub fn print_solution(s: &Solution) {
         Err(_) => {}
     }
     println!(" - Solution length: {}", s.path.len() - 1);
-    println!(" - Solution length: {}", s.path.len() - 1);
     println!(" - Maximum states in memory: {}", s.max_states);
     println!(
         " - Open states at time of solution: {}",
