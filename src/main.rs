@@ -53,24 +53,38 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
                 process::exit(0);
             },
             "--input" | "-i" => {
-                cur = &args[i + 1];
-
-                input = cur.to_string();
+                match args.get(i + 1) {
+                    Some(val) => input = val.to_string(),
+                    None => {
+                        println!("input cannot be blank");
+                        process::exit(1);
+                    }
+                }
             }
             "--goal" | "-o" => {
-                cur = &args[i + 1];
-
-                goal = cur.to_string();
+                match args.get(i + 1) {
+                    Some(val) => goal = val.to_string(),
+                    None => {
+                        println!("goal cannot be blank");
+                        process::exit(1);
+                    }
+                }
             }
             "--heuristic" | "-h" => {
-                cur = &args[i + 1];
-
-                match &cur as &str {
-                    "hamming" => problem.heuristic = heuristics::hamming,
-                    "manhattan" => problem.heuristic = heuristics::manhattan,
-                    "conflicts" => problem.heuristic = heuristics::linear_conflicts,
-                    _ => {
-                        println!("heuristic {} is not valid", cur);
+                match args.get(i + 1) {
+                    Some(cur) => {
+                        match &cur as &str {
+                            "hamming" => problem.heuristic = heuristics::hamming,
+                            "manhattan" => problem.heuristic = heuristics::manhattan,
+                            "conflicts" => problem.heuristic = heuristics::linear_conflicts,
+                            _ => {
+                                println!("heuristic {} is not valid", cur);
+                                process::exit(1);
+                            }
+                        }
+                    }
+                    None => {
+                        println!("heuristic cannot be blank");
                         process::exit(1);
                     }
                 }
@@ -78,12 +92,18 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
             "--uniform" | "-u" => problem.h_weight = 0,
             "--greedy" | "-g" => problem.g_weight = 0,
             "--iterations" | "-n" => {
-                cur = &args[i + 1];
-
-                match cur.parse::<u64>() {
-                    Ok(val) => iterations = val,
-                    Err(_) => {
-                        println!("iterations {} is not valid", cur);
+                match args.get(i + 1) {
+                    Some(cur) => {
+                        match cur.parse::<u64>() {
+                            Ok(val) => iterations = val,
+                            Err(_) => {
+                                println!("iterations {} is not valid", cur);
+                                process::exit(1);
+                            }
+                        }
+                    }
+                    None => {
+                        println!("iterations cannot be blank");
                         process::exit(1);
                     }
                 }
