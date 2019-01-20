@@ -45,7 +45,7 @@ fn parse_args(args: Vec<String>) -> (Problem, ParsedArgs) {
     }
 
     for i in 1..args.len() {
-        let mut cur = &args[i];
+        let cur = &args[i];
 
         match &cur as &str {
             "--help" => {

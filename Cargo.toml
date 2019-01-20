@@ -5,6 +5,7 @@ authors = [
 	"Pierre Bondoerffer <pbondoer@student.42.fr>",
 	"Clément Ledant <cledant@student.42.fr>",
 ]
+edition = "2018"
 
 [dependencies]
 npuzzle_lib = { path = "./npuzzle_lib" }
